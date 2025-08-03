@@ -11,6 +11,7 @@ import 'package:intellicash/core/database/services/user-setting/user_setting_ser
 import 'package:intellicash/core/database/services/user-setting/utils/get_theme_from_string.dart';
 import 'package:intellicash/core/presentation/theme.dart';
 import 'package:intellicash/core/routes/root_navigator_observer.dart';
+import 'package:intellicash/core/utils/error_handler.dart';
 import 'package:intellicash/core/utils/logger.dart';
 import 'package:intellicash/core/utils/scroll_behavior_override.dart';
 import 'package:intellicash/firebase_options.dart';
@@ -18,32 +19,58 @@ import 'package:intellicash/i18n/generated/translations.g.dart';
 import 'package:intl/intl.dart';
 
 void main() async {
+  return errorHandler.handleAsync(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+      
+      // Initialize services with error handling
+      await errorHandler.handleDatabaseOperation(
+        () async {
+          await UserSettingService.instance.initializeGlobalStateMap();
+          await AppDataService.instance.initializeGlobalStateMap();
+        },
+        context: 'Initializing global state maps',
+      );
 
-  WidgetsFlutterBinding.ensureInitialized();
-  await UserSettingService.instance.initializeGlobalStateMap();
-  await AppDataService.instance.initializeGlobalStateMap();
+      PrivateModeService.instance
+          .setPrivateMode(appStateSettings[SettingKey.privateModeAtLaunch] == '1');
 
-  PrivateModeService.instance
-      .setPrivateMode(appStateSettings[SettingKey.privateModeAtLaunch] == '1');
+      // Set plural resolver for Turkish
+      await errorHandler.handleValidation(
+        () async {
+          await LocaleSettings.setPluralResolver(
+            language: 'tr',
+            cardinalResolver: (n,
+                {String? few,
+                String? many,
+                String? one,
+                String? other,
+                String? two,
+                String? zero}) {
+              if (n == 1) return 'one';
+              return 'other';
+            },
+          );
+        },
+        context: 'Setting Turkish plural resolver',
+      );
 
-  // Set plural resolver for Turkish
-  await LocaleSettings.setPluralResolver(
-    language: 'tr',
-    cardinalResolver: (n,
-        {String? few,
-        String? many,
-        String? one,
-        String? other,
-        String? two,
-        String? zero}) {
-      if (n == 1) return 'one';
-      return 'other';
+      // Initialize Firebase with error handling
+      await errorHandler.handleNetworkOperation(
+        () async {
+          await Firebase.initializeApp(
+            options: DefaultFirebaseOptions.android,
+          );
+        },
+        context: 'Initializing Firebase',
+      );
+
+      runApp(InitializeApp(key: appStateKey));
     },
+    type: ErrorHandler.ErrorType.unknown,
+    severity: ErrorHandler.ErrorSeverity.critical,
+    context: 'Application startup',
   );
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.android,
-  );
-  runApp(InitializeApp(key: appStateKey));
 }
 
 final GlobalKey<TabsPageState> tabsPageKey = GlobalKey();
@@ -79,37 +106,47 @@ class MonekinAppEntryPoint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Logger.printDebug('------------------ APP ENTRY POINT ------------------');
+    return errorHandler.handleValidation(
+      () {
+        Logger.printDebug('------------------ APP ENTRY POINT ------------------');
 
-    final lang = appStateSettings[SettingKey.appLanguage];
+        final lang = appStateSettings[SettingKey.appLanguage];
 
-    if (lang != null) {
-      Logger.printDebug('App language found. Setting the locale to `$lang`...');
-      LocaleSettings.setLocaleRaw(lang);
-    } else {
-      Logger.printDebug(
-          'App language not found. Setting the user device language...');
+        if (lang != null) {
+          Logger.printDebug('App language found. Setting the locale to `$lang`...');
+          LocaleSettings.setLocaleRaw(lang);
+        } else {
+          Logger.printDebug(
+              'App language not found. Setting the user device language...');
 
-      LocaleSettings.useDeviceLocale();
+          LocaleSettings.useDeviceLocale();
 
-      // We have nothing to worry here since the useDeviceLocale() func will set the default lang (english in our case) if
-      // the user is using a non-supported language in his device
+          // We have nothing to worry here since the useDeviceLocale() func will set the default lang (english in our case) if
+          // the user is using a non-supported language in his device
 
-      UserSettingService.instance
-          .setItem(
-            SettingKey.appLanguage,
-            LocaleSettings.currentLocale.languageTag,
-          )
-          .then((value) => null);
-    }
+          UserSettingService.instance
+              .setItem(
+                SettingKey.appLanguage,
+                LocaleSettings.currentLocale.languageTag,
+              )
+              .then((value) => null);
+        }
 
-    return TranslationProvider(
-      child: MaterialAppContainer(
-        introSeen: appStateData[AppDataKey.introSeen] == '1',
-        amoledMode: appStateSettings[SettingKey.amoledMode]! == '1',
-        accentColor: appStateSettings[SettingKey.accentColor]!,
-        themeMode: getThemeFromString(appStateSettings[SettingKey.themeMode]!),
-      ),
+        return TranslationProvider(
+          child: MaterialAppContainer(
+            introSeen: appStateData[AppDataKey.introSeen] == '1',
+            amoledMode: appStateSettings[SettingKey.amoledMode]! == '1',
+            accentColor: appStateSettings[SettingKey.accentColor]!,
+            themeMode: getThemeFromString(appStateSettings[SettingKey.themeMode]!),
+          ),
+        );
+      },
+      context: 'Building app entry point',
+    ) ?? const MaterialAppContainer(
+      introSeen: false,
+      amoledMode: false,
+      accentColor: '#2196F3',
+      themeMode: ThemeMode.system,
     );
   }
 }
@@ -130,58 +167,67 @@ class MaterialAppContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get the language of the Intl in each rebuild of the TranslationProvider:
-    Intl.defaultLocale = LocaleSettings.currentLocale.languageTag;
+    return errorHandler.handleValidation(
+      () {
+        // Get the language of the Intl in each rebuild of the TranslationProvider:
+        Intl.defaultLocale = LocaleSettings.currentLocale.languageTag;
 
-    return DynamicColorBuilder(
-        builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-      return MaterialApp(
-        title: 'Intellicash',
-        debugShowCheckedModeBanner: false,
-        locale: TranslationProvider.of(context).flutterLocale,
-        scrollBehavior: ScrollBehaviorOverride(),
-        supportedLocales: AppLocaleUtils.supportedLocales,
-        localizationsDelegates: GlobalMaterialLocalizations.delegates,
-        theme: getThemeData(context,
-            isDark: false,
-            amoledMode: amoledMode,
-            lightDynamic: lightDynamic,
-            darkDynamic: darkDynamic,
-            accentColor: accentColor),
-        darkTheme: getThemeData(context,
-            isDark: true,
-            amoledMode: amoledMode,
-            lightDynamic: lightDynamic,
-            darkDynamic: darkDynamic,
-            accentColor: accentColor),
-        themeMode: themeMode,
-        navigatorKey: navigatorKey,
-        navigatorObservers: [MainLayoutNavObserver()],
-        builder: (context, child) {
-          return Overlay(initialEntries: [
-            OverlayEntry(
-              builder: (context) => Stack(
-                children: [
-                  Row(
+        return DynamicColorBuilder(
+            builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+          return MaterialApp(
+            title: 'Intellicash',
+            debugShowCheckedModeBanner: false,
+            locale: TranslationProvider.of(context).flutterLocale,
+            scrollBehavior: ScrollBehaviorOverride(),
+            supportedLocales: AppLocaleUtils.supportedLocales,
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            theme: getThemeData(context,
+                isDark: false,
+                amoledMode: amoledMode,
+                lightDynamic: lightDynamic,
+                darkDynamic: darkDynamic,
+                accentColor: accentColor),
+            darkTheme: getThemeData(context,
+                isDark: true,
+                amoledMode: amoledMode,
+                lightDynamic: lightDynamic,
+                darkDynamic: darkDynamic,
+                accentColor: accentColor),
+            themeMode: themeMode,
+            navigatorKey: navigatorKey,
+            navigatorObservers: [MainLayoutNavObserver()],
+            builder: (context, child) {
+              return Overlay(initialEntries: [
+                OverlayEntry(
+                  builder: (context) => Stack(
                     children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 1500),
-                        curve: Curves.easeInOutCubicEmphasized,
-                        width:
-                            introSeen ? getNavigationSidebarWidth(context) : 0,
-                        color: Theme.of(context).canvasColor,
+                      Row(
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 1500),
+                            curve: Curves.easeInOutCubicEmphasized,
+                            width:
+                                introSeen ? getNavigationSidebarWidth(context) : 0,
+                            color: Theme.of(context).canvasColor,
+                          ),
+                          Expanded(child: child ?? const SizedBox.shrink()),
+                        ],
                       ),
-                      Expanded(child: child ?? const SizedBox.shrink()),
+                      if (introSeen) NavigationSidebar(key: navigationSidebarKey)
                     ],
                   ),
-                  if (introSeen) NavigationSidebar(key: navigationSidebarKey)
-                ],
-              ),
-            ),
-          ]);
-        },
-        home: introSeen ? TabsPage(key: tabsPageKey) : const IntroPage(),
-      );
-    });
+                ),
+              ]);
+            },
+            home: introSeen ? TabsPage(key: tabsPageKey) : const IntroPage(),
+          );
+        });
+      },
+      context: 'Building MaterialApp',
+    ) ?? MaterialApp(
+      title: 'Intellicash',
+      debugShowCheckedModeBanner: false,
+      home: const IntroPage(),
+    );
   }
 }

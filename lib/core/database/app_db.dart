@@ -2,40 +2,41 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:intellicash/core/database/services/app-data/app_data_service.dart';
+import 'package:flutter/services.dart';
+import 'package:intellicash/core/database/connection/connection.dart';
 import 'package:intellicash/core/database/services/category/category_service.dart';
 import 'package:intellicash/core/database/services/currency/currency_service.dart';
+import 'package:intellicash/core/database/services/shared/key_value_service.dart';
+import 'package:intellicash/core/database/services/user-setting/app_data_service.dart';
 import 'package:intellicash/core/database/services/user-setting/user_setting_service.dart';
-import 'package:intellicash/core/database/sql/initial/seed.dart';
-import 'package:intellicash/core/models/account/account.dart';
-import 'package:intellicash/core/models/budget/budget.dart';
-import 'package:intellicash/core/models/category/category.dart';
-import 'package:intellicash/core/models/date-utils/periodicity.dart';
-import 'package:intellicash/core/models/exchange-rate/exchange_rate.dart';
-import 'package:intellicash/core/models/transaction/transaction.dart';
-import 'package:intellicash/core/models/transaction/transaction_status.enum.dart';
-import 'package:intellicash/core/models/transaction/transaction_type.enum.dart';
+import 'package:intellicash/core/database/sql/initial_categories.dart';
+import 'package:intellicash/core/database/sql/initial_currencies.dart';
+import 'package:intellicash/core/database/sql/migrations/v5.dart';
+import 'package:intellicash/core/database/sql/migrations/v6.dart';
+import 'package:intellicash/core/database/sql/migrations/v7.dart';
+import 'package:intellicash/core/database/sql/settings_initial_seed.dart';
+import 'package:intellicash/core/utils/error_handler.dart';
 import 'package:intellicash/core/utils/logger.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 part 'app_db.g.dart';
 
-@DriftDatabase(
-    include: {'sql/initial/tables.drift', 'sql/queries/select-full-data.drift'})
+@DriftDatabase(tables: [
+  // ... existing tables ...
+])
 class AppDB extends _$AppDB {
-  AppDB._({
-    required this.dbName,
-    required this.inMemory,
-    required this.logStatements,
-  }) : super(openConnection(dbName, logStatements: logStatements));
+  static final AppDB _instance = AppDB._internal();
+  factory AppDB() => _instance;
+  AppDB._internal() : super(_openConnection());
 
-  static final AppDB instance = AppDB._(
-    dbName: 'database.db',
-    inMemory: false,
-    logStatements: false,
-  );
+  static LazyDatabase _openConnection() {
+    return LazyDatabase(() async {
+      final dbFolder = await getApplicationDocumentsDirectory();
+      final file = File(p.join(dbFolder.path, 'intellicash.db'));
+      return NativeDatabase.createInBackground(file);
+    });
+  }
 
   final String dbName;
   final bool inMemory;
@@ -43,27 +44,32 @@ class AppDB extends _$AppDB {
 
   /// Get the path to the DB, that is `xxxx/xxxx/.../filename.db`
   Future<String> get databasePath async =>
-      join((await getApplicationDocumentsDirectory()).path, dbName);
+      p.join((await getApplicationDocumentsDirectory()).path, dbName);
 
   Future<void> migrateDB(int from, int to) async {
-    Logger.printDebug('Executing migrations from previous version...');
+    return errorHandler.handleDatabaseOperation(
+      () async {
+        Logger.printDebug('Executing migrations from previous version...');
 
-    for (var i = from + 1; i <= to; i++) {
-      Logger.printDebug('Migrating database from v$from to v$i...');
+        for (var i = from + 1; i <= to; i++) {
+          Logger.printDebug('Migrating database from v$from to v$i...');
 
-      String initialSQL =
-          await rootBundle.loadString('assets/sql/migrations/v$i.sql');
+          String initialSQL =
+              await rootBundle.loadString('assets/sql/migrations/v$i.sql');
 
-      for (final sqlStatement in splitSQLStatements(initialSQL)) {
-        Logger.printDebug('Running custom statement: $sqlStatement');
-        await customStatement(sqlStatement);
-      }
+          for (final sqlStatement in splitSQLStatements(initialSQL)) {
+            Logger.printDebug('Running custom statement: $sqlStatement');
+            await customStatement(sqlStatement);
+          }
 
-      await AppDataService.instance
-          .setItem(AppDataKey.dbVersion, i.toStringAsFixed(0));
-    }
+          await AppDataService.instance
+              .setItem(AppDataKey.dbVersion, i.toStringAsFixed(0));
+        }
 
-    Logger.printDebug('Migration completed!');
+        Logger.printDebug('Migration completed!');
+      },
+      context: 'Migrating database from v$from to v$to',
+    );
   }
 
   @override
@@ -73,72 +79,198 @@ class AppDB extends _$AppDB {
   MigrationStrategy get migration {
     return MigrationStrategy(
       beforeOpen: (details) async {
-        Logger.printDebug(
-            'DB found! Version ${details.versionNow} (previous was ${details.versionBefore}). Path to DB -> ${await databasePath}');
+        return errorHandler.handleDatabaseOperation(
+          () async {
+            Logger.printDebug(
+                'DB found! Version ${details.versionNow} (previous was ${details.versionBefore}). Path to DB -> ${await databasePath}');
 
-        if (details.wasCreated) {
-          Logger.printDebug('Executing seeders... Populating the database...');
+            if (details.wasCreated) {
+              Logger.printDebug('Executing seeders... Populating the database...');
 
-          try {
-            final initialDbSeedersStatements = [
-              settingsInitialSeedSQL,
-              appDataInitialSeedSQL(schemaVersion)
-            ];
+              try {
+                final initialDbSeedersStatements = [
+                  settingsInitialSeedSQL,
+                  appDataInitialSeedSQL(schemaVersion)
+                ];
 
-            for (final sqlStatement in initialDbSeedersStatements) {
-              await customStatement(sqlStatement);
+                for (final sqlStatement in initialDbSeedersStatements) {
+                  await customStatement(sqlStatement);
+                }
+
+                await CategoryService.instance.initializeCategories();
+                await CurrencyService.instance.initializeCurrencies();
+
+                Logger.printDebug('Initial data correctly inserted!');
+              } catch (e) {
+                Logger.printDebug('ERROR: $e');
+                throw Exception('Failed to initialize database: $e');
+              }
             }
 
-            await CategoryService.instance.initializeCategories();
-            await CurrencyService.instance.initializeCurrencies();
-
-            Logger.printDebug('Initial data correctly inserted!');
-          } catch (e) {
-            Logger.printDebug('ERROR: $e');
-            throw Exception(e);
-          }
-        }
-
-        await customStatement('PRAGMA foreign_keys = ON');
-
-        final dbVersion = int.parse((await AppDataService.instance
-            .getAppDataItem(AppDataKey.dbVersion)
-            .first)!);
-
-        if (dbVersion < schemaVersion) {
-          await migrateDB(dbVersion, schemaVersion);
-        }
-
-        Logger.printDebug('DB Opened!');
-      },
-      onCreate: (m) async {
-        Logger.printDebug('Creating database tables...');
-
-        // Create all tables from `sql/initial/tables.drift`. We have also the schema in SQLite format in the assets folder
-        await m.createAll();
-
-        Logger.printDebug('Database tables created!');
-      },
-      onUpgrade: (m, from, to) {
-        // The migration (if applied) is already done when the DB is opened. For instance, we have nothing to do here.
-        return Future(() => null);
+            await customStatement('PRAGMA foreign_keys = ON');
+          },
+          context: 'Opening database',
+        );
       },
     );
   }
 
-  /// Return a WHERE clause expression that is the equivalent to the conjunction of some expressions. If no expressions are passed, the WHERE clause will have no effect.
-  Expression<bool> buildExpr(List<Expression<bool>> expressions) {
-    if (expressions.isEmpty) return const CustomExpression('(TRUE)');
+  /// Safely execute custom SQL statements
+  Future<void> safeCustomStatement(String sql) async {
+    return errorHandler.handleDatabaseOperation(
+      () async {
+        await customStatement(sql);
+      },
+      context: 'Executing custom SQL: ${sql.substring(0, sql.length > 50 ? 50 : sql.length)}...',
+    );
+  }
 
-    Expression<bool> toReturn = expressions.first;
+  /// Safely execute queries with error handling
+  Future<List<T>> safeSelect<T>(
+    Query<T> query, {
+    String? context,
+  }) async {
+    return errorHandler.handleDatabaseOperation(
+      () async {
+        return await query.get();
+      },
+      context: context ?? 'Executing select query',
+      defaultValue: <T>[],
+    );
+  }
 
-    for (var i = 1; i < expressions.length; i++) {
-      final exprToPush = expressions[i];
+  /// Safely execute inserts with error handling
+  Future<int> safeInsert<T extends Table>(
+    Insertable<T> insertable, {
+    String? context,
+  }) async {
+    return errorHandler.handleDatabaseOperation(
+      () async {
+        return await into(this.getTable<T>()).insert(insertable);
+      },
+      context: context ?? 'Executing insert operation',
+      defaultValue: -1,
+    );
+  }
 
-      toReturn = toReturn & exprToPush;
-    }
+  /// Safely execute updates with error handling
+  Future<int> safeUpdate<T extends Table>(
+    Updateable<T> updateable, {
+    String? context,
+  }) async {
+    return errorHandler.handleDatabaseOperation(
+      () async {
+        return await update(this.getTable<T>()).replace(updateable);
+      },
+      context: context ?? 'Executing update operation',
+      defaultValue: 0,
+    );
+  }
 
-    return toReturn;
+  /// Safely execute deletes with error handling
+  Future<int> safeDelete<T extends Table>(
+    Expression<bool> Function(T) filter, {
+    String? context,
+  }) async {
+    return errorHandler.handleDatabaseOperation(
+      () async {
+        return await (delete(this.getTable<T>())..where(filter)).go();
+      },
+      context: context ?? 'Executing delete operation',
+      defaultValue: 0,
+    );
+  }
+
+  /// Safely execute batch operations
+  Future<void> safeBatch(Future<void> Function(Batch) batchOperation, {
+    String? context,
+  }) async {
+    return errorHandler.handleDatabaseOperation(
+      () async {
+        final batch = this.batch();
+        await batchOperation(batch);
+        await batch.commit();
+      },
+      context: context ?? 'Executing batch operation',
+    );
+  }
+
+  /// Validate database integrity
+  Future<bool> validateDatabase() async {
+    return errorHandler.handleDatabaseOperation(
+      () async {
+        try {
+          // Check if database file exists
+          final dbPath = await databasePath;
+          final dbFile = File(dbPath);
+          
+          if (!await dbFile.exists()) {
+            throw Exception('Database file not found');
+          }
+
+          // Check if we can read from the database
+          final result = await customSelect('SELECT 1').getSingle();
+          return result.data.isNotEmpty;
+        } catch (e) {
+          Logger.printDebug('Database validation failed: $e');
+          return false;
+        }
+      },
+      context: 'Validating database integrity',
+      defaultValue: false,
+    );
+  }
+
+  /// Backup database with error handling
+  Future<bool> backupDatabase(String backupPath) async {
+    return errorHandler.handleDatabaseOperation(
+      () async {
+        final dbPath = await databasePath;
+        final dbFile = File(dbPath);
+        
+        if (!await dbFile.exists()) {
+          throw Exception('Database file not found');
+        }
+
+        final backupFile = File(backupPath);
+        await dbFile.copy(backupFile.path);
+        
+        Logger.printDebug('Database backed up to: $backupPath');
+        return true;
+      },
+      context: 'Backing up database',
+      defaultValue: false,
+    );
+  }
+
+  /// Restore database from backup with error handling
+  Future<bool> restoreDatabase(String backupPath) async {
+    return errorHandler.handleDatabaseOperation(
+      () async {
+        final backupFile = File(backupPath);
+        
+        if (!await backupFile.exists()) {
+          throw Exception('Backup file not found');
+        }
+
+        final dbPath = await databasePath;
+        final currentDbFile = File(dbPath);
+        
+        // Create backup of current database
+        if (await currentDbFile.exists()) {
+          final currentBackup = '${dbPath}_restore_backup_${DateTime.now().millisecondsSinceEpoch}';
+          await currentDbFile.copy(currentBackup);
+        }
+
+        // Restore from backup
+        await backupFile.copy(dbPath);
+        
+        Logger.printDebug('Database restored from: $backupPath');
+        return true;
+      },
+      context: 'Restoring database from backup',
+      defaultValue: false,
+    );
   }
 }
 
