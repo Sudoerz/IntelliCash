@@ -3,12 +3,19 @@ import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/services.dart';
+ main
+
+main
 import 'package:intellicash/core/database/app_db.dart';
 import 'package:intellicash/core/database/services/app-data/app_data_service.dart';
 import 'package:intellicash/core/utils/error_handler.dart';
 import 'package:intellicash/core/utils/logger.dart';
+main
 import 'package:intellicash/i18n/generated/translations.g.dart';
+
+import 'package:intl/intl.dart';
+import 'package:path/path.dart' as path;
+ main
 
 class BackupDatabaseService {
   static final BackupDatabaseService _instance = BackupDatabaseService._internal();
@@ -17,6 +24,7 @@ class BackupDatabaseService {
 
   final AppDB db = AppDB.instance;
 
+ main
   Future<bool> exportDatabase() async {
     return errorHandler.handleDatabaseOperation(
       () async {
@@ -26,6 +34,12 @@ class BackupDatabaseService {
         if (!await dbFile.exists()) {
           throw Exception('Database file not found');
         }
+
+    exportPath = path.join(
+      exportPath,
+      "Intellicash-${DateFormat('yyyyMMdd-Hms').format(DateTime.now())}.db",
+    );
+ main
 
         final result = await FilePicker.platform.saveFile(
           dialogTitle: t.backup.export.title,
