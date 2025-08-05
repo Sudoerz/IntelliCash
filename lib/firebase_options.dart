@@ -3,13 +3,14 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'dart:io' show Platform;
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
 /// Example:
 /// ```dart
 /// import 'firebase_options.dart';
-/// // ...
+/// // ... 
 /// await Firebase.initializeApp(
 ///   options: DefaultFirebaseOptions.currentPlatform,
 /// );
@@ -52,12 +53,28 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCRZPKNr0sJTF9DyWpZPO87IfaWeitzd0s',
-    appId: '1:562989165357:android:3f9456bc53e23a757e81a4',
-    messagingSenderId: '562989165357',
-    projectId: 'intellicash-6db34',
-    storageBucket: 'intellicash-6db34.firebasestorage.app',
-  );
+  static FirebaseOptions get android {
+    // Get API key from environment variable or use a placeholder
+    final apiKey = const String.fromEnvironment('FIREBASE_API_KEY', 
+        defaultValue: 'YOUR_API_KEY_HERE');
+    
+    if (apiKey == 'YOUR_API_KEY_HERE') {
+      throw UnsupportedError(
+        'Firebase API key not found. Please set FIREBASE_API_KEY environment variable '
+        'or run: flutterfire configure'
+      );
+    }
 
+    return FirebaseOptions(
+      apiKey: apiKey,
+      appId: const String.fromEnvironment('FIREBASE_APP_ID', 
+          defaultValue: '1:562989165357:android:3f9456bc53e23a757e81a4'),
+      messagingSenderId: const String.fromEnvironment('FIREBASE_SENDER_ID', 
+          defaultValue: '562989165357'),
+      projectId: const String.fromEnvironment('FIREBASE_PROJECT_ID', 
+          defaultValue: 'intellicash-6db34'),
+      storageBucket: const String.fromEnvironment('FIREBASE_STORAGE_BUCKET', 
+          defaultValue: 'intellicash-6db34.firebasestorage.app'),
+    );
+  }
 }

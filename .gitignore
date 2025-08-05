@@ -46,3 +46,13 @@ app.*.map.json
 # Project specific
 **/generated/
 android/app/.cxx/
+
+# Security - Keystore and sensitive files
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+firebase_options.dart
+google-services.json
+GoogleService-Info.plist

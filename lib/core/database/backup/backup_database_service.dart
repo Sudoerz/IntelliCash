@@ -1,162 +1,252 @@
 import 'dart:io';
 
 import 'package:csv/csv.dart';
+import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
+ main
+
+main
 import 'package:intellicash/core/database/app_db.dart';
 import 'package:intellicash/core/database/services/app-data/app_data_service.dart';
-import 'package:intellicash/core/models/transaction/transaction.dart';
+import 'package:intellicash/core/utils/error_handler.dart';
 import 'package:intellicash/core/utils/logger.dart';
+main
+import 'package:intellicash/i18n/generated/translations.g.dart';
+
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+ main
 
 class BackupDatabaseService {
-  AppDB db = AppDB.instance;
+  static final BackupDatabaseService _instance = BackupDatabaseService._internal();
+  factory BackupDatabaseService() => _instance;
+  BackupDatabaseService._internal();
 
-  Future<void> exportDatabaseFile(String exportPath) async {
-    List<int> dbFileInBytes = await File(await db.databasePath).readAsBytes();
+  final AppDB db = AppDB.instance;
+
+ main
+  Future<bool> exportDatabase() async {
+    return errorHandler.handleDatabaseOperation(
+      () async {
+        final dbPath = await db.databasePath;
+        final dbFile = File(dbPath);
+
+        if (!await dbFile.exists()) {
+          throw Exception('Database file not found');
+        }
 
     exportPath = path.join(
       exportPath,
       "Intellicash-${DateFormat('yyyyMMdd-Hms').format(DateTime.now())}.db",
     );
+ main
 
-    File downloadFile = File(exportPath);
+        final result = await FilePicker.platform.saveFile(
+          dialogTitle: t.backup.export.title,
+          fileName: 'intellicash_backup_${DateTime.now().millisecondsSinceEpoch}.db',
+        );
 
-    await downloadFile.writeAsBytes(dbFileInBytes);
-  }
+        if (result != null) {
+          await dbFile.copy(result);
+          Logger.printDebug('Database exported successfully to: $result');
+          return true;
+        }
 
-  Future<String> exportSpreadsheet(
-    String exportPath,
-    List<MoneyTransaction> data, {
-    String format = 'csv',
-    String separator = ',',
-  }) async {
-    var csvData = '';
-
-    var keys = [
-      'ID',
-      'Amount',
-      'Date',
-      'Title',
-      'Note',
-      'Account',
-      'Currency',
-      'Category',
-      'Subcategory',
-    ];
-
-    if (data.isNotEmpty) {
-      for (final key in keys) {
-        csvData += key + separator;
-      }
-    }
-
-    csvData += '\n';
-
-    final dateFormatter = DateFormat('yyyy-MM-dd HH:mm:ss');
-
-    for (final transaction in data) {
-      final toAdd = [
-        transaction.id,
-        transaction.value.toStringAsFixed(2),
-        dateFormatter.format(transaction.date),
-        transaction.title ?? '',
-        transaction.notes ?? '',
-        transaction.account.name,
-        transaction.account.currencyId,
-        if (transaction.isIncomeOrExpense)
-          (transaction.category!.parentCategory != null
-              ? transaction.category!.parentCategory!.name
-              : transaction.category!.name),
-        if (transaction.isTransfer) 'TRANSFER',
-        (transaction.category?.parentCategory != null
-            ? transaction.category?.name
-            : '')
-      ];
-
-      csvData += toAdd.join(separator);
-
-      csvData += '\n';
-
-      if (transaction.isTransfer) {
-        csvData += toAdd.join(separator);
-
-        csvData += '\n';
-      }
-    }
-
-    exportPath =
-        '${exportPath}Transactions-${DateFormat('yyyyMMdd-Hms').format(DateTime.now())}.csv';
-
-    File exportFile = File(exportPath);
-
-    await exportFile.writeAsString(csvData);
-
-    return exportPath;
+        return false;
+      },
+      context: 'Exporting database',
+      defaultValue: false,
+    );
   }
 
   Future<bool> importDatabase() async {
-    FilePickerResult? result;
+    return errorHandler.handleDatabaseOperation(
+      () async {
+        final selectedFile = await readFile();
+        if (selectedFile == null) return false;
 
-    try {
-      result = await FilePicker.platform.pickFiles(
-        type: Platform.isWindows ? FileType.custom : FileType.any,
-        allowedExtensions: Platform.isWindows ? ['db'] : null,
-        allowMultiple: false,
-      );
-    } catch (e) {
-      throw Exception(e.toString());
-    }
+        final dbPath = await db.databasePath;
+        final currentDBContent = await File(dbPath).readAsBytes();
 
-    if (result != null) {
-      File selectedFile = File(result.files.single.path!);
+        // Create a backup of current database
+        final backupPath = '${dbPath}_backup_${DateTime.now().millisecondsSinceEpoch}';
+        await File(dbPath).copy(backupPath);
 
-      // Delete the previous database
-      String dbPath = await db.databasePath;
+        try {
+          // Replace current database with imported one
+          await File(dbPath)
+              .writeAsBytes(await selectedFile.readAsBytes(), mode: FileMode.write);
 
-      final currentDBContent = await File(dbPath).readAsBytes();
+          // Validate and migrate the imported database
+          final dbVersion = int.parse((await AppDataService.instance
+              .getAppDataItem(AppDataKey.dbVersion)
+              .first)!);
 
-      // Load the new database
-      await File(dbPath)
-          .writeAsBytes(await selectedFile.readAsBytes(), mode: FileMode.write);
+          if (dbVersion < db.schemaVersion) {
+            await db.migrateDB(dbVersion, db.schemaVersion);
+          }
 
-      try {
-        final dbVersion = int.parse((await AppDataService.instance
-            .getAppDataItem(AppDataKey.dbVersion)
-            .first)!);
+          db.markTablesUpdated(db.allTables);
+          Logger.printDebug('Database imported successfully');
+          return true;
+        } catch (e) {
+          // Restore the original database on error
+          await File(dbPath).writeAsBytes(currentDBContent, mode: FileMode.write);
+          db.markTablesUpdated(db.allTables);
 
-        if (dbVersion < db.schemaVersion) {
-          await db.migrateDB(dbVersion, db.schemaVersion);
+          Logger.printDebug('Database import failed: $e');
+          throw Exception('The database is invalid or could not be read. Please check the file format.');
         }
-
-        db.markTablesUpdated(db.allTables);
-      } catch (e) {
-        // Reset the DB as it was
-        await File(dbPath).writeAsBytes(currentDBContent, mode: FileMode.write);
-        db.markTablesUpdated(db.allTables);
-
-        Logger.printDebug('Error\n: $e');
-
-        throw Exception('The database is invalid or could not be readed');
-      }
-
-      return true;
-    }
-
-    return false;
+      },
+      context: 'Importing database',
+      defaultValue: false,
+    );
   }
 
   Future<File?> readFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    return errorHandler.handleFileOperation(
+      () async {
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['db'],
+        );
 
-    if (result != null) {
-      return File(result.files.single.path!);
-    }
+        if (result != null && result.files.single.path != null) {
+          return File(result.files.single.path!);
+        }
 
-    return null;
+        return null;
+      },
+      context: 'Reading file for import',
+      defaultValue: null,
+    );
   }
 
   Future<List<List<dynamic>>> processCsv(String csvData) async {
-    return const CsvToListConverter().convert(csvData, eol: '\n');
+    return errorHandler.handleValidation(
+      () {
+        try {
+          return const CsvToListConverter().convert(csvData, eol: '\n');
+        } catch (e) {
+          throw Exception('Invalid CSV format: $e');
+        }
+      },
+      context: 'Processing CSV data',
+    ) ?? [];
+  }
+
+  Future<bool> exportToCsv() async {
+    return errorHandler.handleDatabaseOperation(
+      () async {
+        // Get all transactions
+        final transactions = await db.select(db.transactions).get();
+        
+        if (transactions.isEmpty) {
+          throw Exception('No transactions to export');
+        }
+
+        // Convert to CSV format
+        final csvData = [
+          ['Date', 'Account', 'Category', 'Title', 'Amount', 'Type', 'Status', 'Notes']
+        ];
+
+        for (final transaction in transactions) {
+          csvData.add([
+            transaction.date.toIso8601String(),
+            transaction.accountID,
+            transaction.categoryID ?? '',
+            transaction.title ?? '',
+            transaction.value.toString(),
+            transaction.type ?? 'E',
+            transaction.status ?? '',
+            transaction.notes ?? '',
+          ]);
+        }
+
+        final csvString = const CsvToListConverter().convert(csvData);
+        final result = await FilePicker.platform.saveFile(
+          dialogTitle: 'Export Transactions',
+          fileName: 'intellicash_transactions_${DateTime.now().millisecondsSinceEpoch}.csv',
+        );
+
+        if (result != null) {
+          await File(result).writeAsString(csvString.toString());
+          Logger.printDebug('Transactions exported to CSV: $result');
+          return true;
+        }
+
+        return false;
+      },
+      context: 'Exporting transactions to CSV',
+      defaultValue: false,
+    );
+  }
+
+  Future<bool> importFromCsv() async {
+    return errorHandler.handleDatabaseOperation(
+      () async {
+        final result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['csv'],
+        );
+
+        if (result == null || result.files.single.path == null) {
+          return false;
+        }
+
+        final file = File(result.files.single.path!);
+        final csvData = await file.readAsString();
+        final rows = await processCsv(csvData);
+
+        if (rows.length < 2) {
+          throw Exception('CSV file is empty or invalid');
+        }
+
+        // Skip header row and process data
+        int importedCount = 0;
+        for (int i = 1; i < rows.length; i++) {
+          try {
+            final row = rows[i];
+            if (row.length < 5) continue; // Skip invalid rows
+
+            // Parse transaction data
+            final date = DateTime.parse(row[0].toString());
+            final accountId = row[1].toString();
+            final categoryId = row[2].toString().isNotEmpty ? row[2].toString() : null;
+            final title = row[3].toString();
+            final amount = double.parse(row[4].toString());
+            final type = row.length > 5 ? row[5].toString() : 'E';
+            final status = row.length > 6 ? row[6].toString() : null;
+            final notes = row.length > 7 ? row[7].toString() : null;
+
+            // Insert transaction
+            await db.into(db.transactions).insert(
+              TransactionsCompanion.insert(
+                id: const Value.absent(), // Auto-generated
+                date: date,
+                accountID: accountId,
+                categoryID: Value(categoryId),
+                title: Value(title),
+                value: amount,
+                type: Value(type),
+                status: Value(status),
+                notes: Value(notes),
+                isHidden: const Value(false),
+              ),
+            );
+
+            importedCount++;
+          } catch (e) {
+            Logger.printDebug('Failed to import row $i: $e');
+            // Continue with other rows
+          }
+        }
+
+        Logger.printDebug('Imported $importedCount transactions from CSV');
+        return importedCount > 0;
+      },
+      context: 'Importing transactions from CSV',
+      defaultValue: false,
+    );
   }
 }
