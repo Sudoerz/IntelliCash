@@ -77,6 +77,7 @@ class _TagFormPageState extends State<TagFormPage> {
       }
 
       await TagService.instance.insertTag(tagToEdit).then((value) {
+        if (!mounted) return;
         Navigator.pop(context);
 
         messager.showSnackBar(SnackBar(content: Text(t.tags.create_success)));
@@ -111,6 +112,7 @@ class _TagFormPageState extends State<TagFormPage> {
                     if (isConfirmed != true) return;
 
                     TagService.instance.deleteTag(widget.tag!.id).then((value) {
+                      if (!context.mounted) return;
                       Navigator.pop(context);
 
                       scaffold.showSnackBar(

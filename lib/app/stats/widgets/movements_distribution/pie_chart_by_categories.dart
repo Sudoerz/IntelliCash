@@ -104,7 +104,7 @@ class _PieChartByCategoriesState extends State<PieChartByCategories> {
     if (data.isEmpty) {
       return [
         PieChartSectionData(
-          color: Colors.grey.withOpacity(0.175),
+          color: Colors.grey.withAlpha((0.175 * 255).toInt()),
           value: 100,
           radius: 50,
           showTitle: false,
@@ -208,6 +208,7 @@ class _PieChartByCategoriesState extends State<PieChartByCategories> {
     return StreamBuilder(
       stream: TransactionService.instance
           .getTransactions(filters: _getTransactionFilters())
+          // ignore: use_build_context_synchronously
           .asyncMap((data) => getEvolutionData(context, data)),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
@@ -280,7 +281,7 @@ class _PieChartByCategoriesState extends State<PieChartByCategories> {
                             color: Theme.of(context)
                                 .colorScheme
                                 .surface
-                                .withOpacity(0.1),
+                                .withAlpha((0.1 * 255).round()),
                           ),
                         )),
                   ),

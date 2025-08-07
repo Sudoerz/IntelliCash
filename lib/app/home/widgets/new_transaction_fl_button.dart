@@ -25,7 +25,7 @@ class NewTransactionButton extends StatelessWidget {
       confirmationText: t.ui_actions.continue_text,
     ).then((value) {
       if (value != true) return;
-
+      if (!context.mounted) return;
       RouteUtils.pushRoute(context, const AccountFormPage());
     });
   }
@@ -36,8 +36,10 @@ class NewTransactionButton extends StatelessWidget {
         .first
         .then((value) {
       if (!value) {
+        if (!context.mounted) return;
         _showShouldCreateAccountWarn(context);
       } else {
+        if (!context.mounted) return;
         RouteUtils.pushRoute(context, const TransactionFormPage());
       }
     });

@@ -26,7 +26,7 @@ class Skeleton extends StatelessWidget {
               ? const EdgeInsets.symmetric(vertical: 2, horizontal: 0)
               : null,
           decoration: BoxDecoration(
-            color: color ?? Colors.black.withOpacity(0.04),
+            color: color ?? Colors.black.withAlpha((0.04 * 255).toInt()),
             borderRadius: BorderRadius.circular(4),
           ),
         ),

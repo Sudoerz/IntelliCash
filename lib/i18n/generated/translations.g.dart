@@ -44,7 +44,8 @@ enum AppLocale with BaseAppLocale<AppLocale, Translations> {
 
 	const AppLocale({
 		required this.languageCode,
-		this.scriptCode, // ignore: unused_element
+		// ignore: unused_element_parameter
+		this.scriptCode,
 		this.countryCode, // ignore: unused_element
 	});
 

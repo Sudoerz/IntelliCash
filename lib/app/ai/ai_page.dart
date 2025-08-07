@@ -95,7 +95,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  void _handleFileSelection() async {
+  Future<void> _handleFileSelection() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.any,
     );
@@ -115,7 +115,7 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  void _handleImageSelection() async {
+  Future<void> _handleImageSelection() async {
     final result = await ImagePicker().pickImage(
       imageQuality: 70,
       maxWidth: 1440,
@@ -141,7 +141,7 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  void _handleMessageTap(BuildContext _, types.Message message) async {
+  Future<void> _handleMessageTap(BuildContext _, types.Message message) async {
     if (message is types.FileMessage) {
       var localPath = message.uri;
 
@@ -214,7 +214,7 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _generateContent(String prompt) async {
     const apiKey =
-        "AIzaSyAV6kKJDMe8Q9FYTyUw0ogx-Oi4pfAn9j4"; //replace your api key
+        'AIzaSyAV6kKJDMe8Q9FYTyUw0ogx-Oi4pfAn9j4'; //replace your api key
     final model =
         GenerativeModel(model: 'gemini-1.5-flash-latest', apiKey: apiKey);
     final content = [Content.text(prompt)];
@@ -226,16 +226,16 @@ class _ChatPageState extends State<ChatPage> {
         author: _user2,
         createdAt: DateTime.now().millisecondsSinceEpoch,
         id: const Uuid().v4(),
-        text: response.text ?? "",
+        text: response.text ?? '',
       );
       _addMessage(replyText);
-      print(response.text);
+      debugPrint(response.text);
     } catch (e) {
-      print('Error generating content: $e');
+      debugPrint('Error generating content: $e');
     }
   }
 
-  void _loadMessages() async {
+  Future<void> _loadMessages() async {
     final response = await rootBundle.loadString('assets/messages.json');
     final messages = (jsonDecode(response) as List)
         .map((e) => types.Message.fromJson(e as Map<String, dynamic>))

@@ -14,7 +14,7 @@ import 'package:intellicash/core/database/services/exchange-rate/exchange_rate_s
 import 'package:intellicash/core/database/services/transaction/transaction_service.dart';
 import 'package:intellicash/core/models/account/account.dart';
 import 'package:intellicash/core/models/transaction/transaction_status.enum.dart';
-import 'package:intellicash/core/presentation/widgets/bottomSheetFooter.dart';
+import 'package:intellicash/core/presentation/widgets/bottom_sheet_footer.dart';
 import 'package:intellicash/core/presentation/widgets/card_with_header.dart';
 import 'package:intellicash/core/presentation/widgets/form_fields/date_form_field.dart';
 import 'package:intellicash/core/presentation/widgets/inline_info_card.dart';
@@ -390,11 +390,13 @@ class _ArchiveWarnDialogState extends State<ArchiveWarnDialog> {
                         ),
                       )
                           .then((value) {
+                        if (!context.mounted) return;
                         Navigator.pop(context, true);
                         ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(t.account.close.success)));
                       }).catchError(
                         (err) {
+                          if (!context.mounted) return;
                           Navigator.pop(context);
 
                           ScaffoldMessenger.of(context).showSnackBar(

@@ -44,11 +44,13 @@ class CategoryFormFunctions {
       if (isConfirmed != true) return;
 
       CategoryService.instance.deleteCategory(categoryId).then((value) {
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(t.categories.delete_success)));
 
         Navigator.of(context).pop();
       }).catchError((error) {
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(error)));
       });
@@ -66,7 +68,7 @@ class CategoryFormFunctions {
       if (selCategory == null) {
         return;
       }
-
+      if (!context.mounted) return;
       confirmDialog(
         context,
         dialogTitle: t.categories.merge,
@@ -95,7 +97,7 @@ class CategoryFormFunctions {
         ],
       ).then((isConfirmed) async {
         if (isConfirmed != true) return;
-
+        if (!context.mounted) return;
         final snackbarDisplayer = ScaffoldMessenger.of(context).showSnackBar;
 
         onSuccess() {
@@ -151,7 +153,7 @@ class CategoryFormFunctions {
       if (selCategory == null) {
         return;
       }
-
+      if (!context.mounted) return;
       confirmDialog(
         context,
         dialogTitle: t.categories.make_child,
@@ -178,7 +180,7 @@ class CategoryFormFunctions {
         ],
       ).then((isConfirmed) async {
         if (isConfirmed != true) return;
-
+        if (!context.mounted) return;
         final snackbarDisplayer = ScaffoldMessenger.of(context).showSnackBar;
 
         onSuccess() {

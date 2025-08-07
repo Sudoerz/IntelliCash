@@ -46,14 +46,30 @@ class _DonateButtonState extends State<DonateButton> {
     }, onDone: () {
       _subscription?.cancel();
     }, onError: (error) {
+      if(!mounted) return;
       showSnackbarMessage(context, t.more.help_us.donate_err);
     }) as StreamSubscription<List<PurchaseDetails>>;
   }
 
-  void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
+  Future<void> _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) async {
     final t = Translations.of(context);
 
-    purchaseDetailsList.forEach((PurchaseDetails purchaseDetails) async {
+    // purchaseDetailsList.forEach((PurchaseDetails purchaseDetails) async {
+    //   if (purchaseDetails.status == PurchaseStatus.pending) {
+    //     // LOADING
+    //   } else {
+    //     if (purchaseDetails.status == PurchaseStatus.error) {
+    //       showSnackbarMessage(context, t.more.help_us.donate_err);
+    //     } else if (purchaseDetails.status == PurchaseStatus.purchased) {
+    //       showSnackbarMessage(context, t.more.help_us.donate_success);
+    //     }
+    //     if (purchaseDetails.pendingCompletePurchase) {
+    //       await InAppPurchase.instance.completePurchase(purchaseDetails);
+    //     }
+    //   }
+    // });
+
+    for (final purchaseDetails in purchaseDetailsList) {
       if (purchaseDetails.status == PurchaseStatus.pending) {
         // LOADING
       } else {
@@ -66,7 +82,7 @@ class _DonateButtonState extends State<DonateButton> {
           await InAppPurchase.instance.completePurchase(purchaseDetails);
         }
       }
-    });
+    }
   }
 
   showSnackbarMessage(BuildContext context, String msg) {
@@ -133,7 +149,7 @@ class _DonateButtonState extends State<DonateButton> {
           margin: const EdgeInsets.all(0),
           color: isAppInLightBrightness(context)
               ? AppColors.of(context).danger.lighten(0.8)
-              : AppColors.of(context).danger.withOpacity(0.2),
+              : AppColors.of(context).danger.withAlpha((0.2 * 255).toInt()),
           shape: RoundedRectangleBorder(
               side: BorderSide(
                   color: Theme.of(context).colorScheme.tertiary, width: 2),
