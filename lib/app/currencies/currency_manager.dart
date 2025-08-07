@@ -172,8 +172,8 @@ class _CurrencyManagerPageState extends State<CurrencyManagerPage> {
                             .first;
 
                         if (currency == null) return;
-
-                        RouteUtils.pushRoute(context,
+                        if (!context.mounted) return;
+                        await RouteUtils.pushRoute(context,
                             ExchangeRateDetailsPage(currency: currency));
                       },
                     );

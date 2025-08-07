@@ -170,7 +170,7 @@ class TransactionListTile extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: transaction.nextPayStatus!
                             .color(context)
-                            .withOpacity(0.2),
+                            .withAlpha((0.2 * 255).round()),
                         border: Border.all(
                           color: transaction.nextPayStatus!.color(context),
                           width: 0.2,
@@ -248,7 +248,7 @@ class TransactionListTile extends StatelessWidget {
       ),
       selected: isSelected,
       selectedTileColor:
-          Theme.of(context).colorScheme.primary.withOpacity(0.15),
+          Theme.of(context).colorScheme.primary.withAlpha((0.15 * 255).round()),
       onTap: onTap ??
           () {
             RouteUtils.pushRoute(

@@ -137,19 +137,18 @@ class _OutlinedContainer extends StatelessWidget {
     this.filled = false,
     this.borderRadius = 15,
     this.borderColor,
-    this.enabled = true,
-    super.key,
+    // this.enabled = true,
   });
 
   final Widget child;
   final bool filled;
   final double borderRadius;
   final Color? borderColor;
-  final bool enabled;
+  // final bool enabled;
 
   @override
   Widget build(BuildContext context) {
-    if (enabled == false) return child;
+    // if (enabled == false) return child;
 
     final buttonColor = borderColor ?? Theme.of(context).colorScheme.secondary;
 
@@ -157,10 +156,10 @@ class _OutlinedContainer extends StatelessWidget {
       duration: const Duration(milliseconds: 250),
       decoration: BoxDecoration(
         border: Border.all(
-          color: buttonColor.withOpacity(filled ? 0.6 : 0.5),
+          color: buttonColor.withAlpha(((filled ? 0.6 : 0.5) * 255).toInt()),
           width: 2,
         ),
-        color: filled ? buttonColor.withOpacity(0.2) : Colors.transparent,
+        color: filled ? buttonColor.withAlpha((0.2 * 255).toInt()) : Colors.transparent,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
       child: child,

@@ -12,11 +12,12 @@ class FadeIn extends StatefulWidget {
   final Duration duration;
 
   @override
-  _FadeInState createState() => _FadeInState(duration);
+  // ignore: no_logic_in_create_state
+  FadeInState createState() => FadeInState(duration);
 }
 
-class _FadeInState extends AnimationControllerState<FadeIn> {
-  _FadeInState(super.duration);
+class FadeInState extends AnimationControllerState<FadeIn> {
+  FadeInState(super.duration);
 
   late Animation<double> _opacityAnimation;
 

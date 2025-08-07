@@ -291,7 +291,7 @@ class _ColorPreviewTile extends StatelessWidget {
           color: backgroundColor,
           borderRadius: BorderRadius.circular(4),
           border: foregroundColor != null
-              ? Border.all(color: foregroundColor!.withOpacity(0.2))
+              ? Border.all(color: foregroundColor!.withAlpha((0.2 * 255).toInt()))
               : null,
         ),
         alignment: Alignment.center,

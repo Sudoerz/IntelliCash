@@ -47,6 +47,7 @@ class BackupSettingsPage extends StatelessWidget {
 
                   BackupDatabaseService().importDatabase().then((value) {
                     if (!value) {
+                      if (!context.mounted) return;
                       Navigator.pop(context);
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -58,6 +59,8 @@ class BackupSettingsPage extends StatelessWidget {
 
                     RouteUtils.popAllRoutesExceptFirst();
 
+                    if (!context.mounted) return;
+
                     tabsPageKey.currentState!.changePage(
                       getAllDestinations(context, shortLabels: false)
                           .firstWhere((element) =>
@@ -68,6 +71,7 @@ class BackupSettingsPage extends StatelessWidget {
                       SnackBar(content: Text(t.backup.import.success)),
                     );
                   }).catchError((err) {
+                    if (!context.mounted) return;
                     Navigator.pop(context);
 
                     ScaffoldMessenger.of(context)

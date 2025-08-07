@@ -126,7 +126,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
           showSnackbar(
               '${t.transaction.new_success}. ${t.transaction.next_payments.recurrent_rule_finished}');
-
+          if (!context.mounted) return;
           Navigator.pop(context);
 
           return;
@@ -183,13 +183,14 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         TransactionService.instance
             .deleteTransaction(transaction.id)
             .then((value) {
+          if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
                   '${t.transaction.next_payments.skip_success}. ${t.transaction.next_payments.recurrent_rule_finished}'),
             ),
           );
-
+          if (!context.mounted) return;
           Navigator.pop(context);
         });
 
@@ -201,7 +202,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           .setTransactionNextPayment(transaction)
           .then((inserted) {
         if (inserted == 0) return;
-
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(t.transaction.next_payments.skip_success),
         ));
@@ -224,7 +225,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             width: 1,
             color: transaction.nextPayStatus!
                 .color(context)
-                .withOpacity(isNext ? 1 : 0.3),
+                .withAlpha((isNext ? 1 : 0.3 * 255).round()),
           )),
       child: ListTile(
         contentPadding: const EdgeInsets.only(left: 16, right: 6),
@@ -237,7 +238,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
           isNext ? transaction.nextPayStatus!.icon : Icons.access_time,
           color: transaction.nextPayStatus!
               .color(context)
-              .withOpacity(isNext ? 1 : 0.3),
+              .withAlpha((isNext ? 1 : 0.3 * 255).round()),
         ),
         title: Text(DateFormat.yMMMd().format(date)),
         subtitle: !isNext
@@ -252,7 +253,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         trailing: Row(mainAxisSize: MainAxisSize.min, children: [
           IconButton(
             color: AppColors.of(context).danger,
-            disabledColor: AppColors.of(context).danger.withOpacity(0.3),
+            disabledColor:
+                AppColors.of(context).danger.withAlpha((0.3 * 255).round()),
             icon: const Icon(Icons.cancel_rounded),
             tooltip: t.transaction.next_payments.skip,
             onPressed: !isNext
@@ -265,8 +267,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 !isNext ? null : () => showPayModal(context, transaction),
             color: AppColors.of(context).success.darken(0.4),
             tooltip: !isNext ? null : t.transaction.next_payments.accept,
-            disabledColor:
-                AppColors.of(context).success.darken(0.4).withOpacity(0.3),
+            disabledColor: AppColors.of(context)
+                .success
+                .darken(0.4)
+                .withAlpha((0.3 * 255).round()),
             icon: const Icon(Icons.price_check_rounded),
           ),
         ]),
@@ -716,7 +720,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w500,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.85)),
+            color: Theme.of(context)
+                .colorScheme
+                .onSurface
+                .withAlpha((0.85 * 255).round())),
       ),
     );
   }
