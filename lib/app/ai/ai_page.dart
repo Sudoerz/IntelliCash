@@ -213,8 +213,19 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _generateContent(String prompt) async {
-    const apiKey =
-        'AIzaSyAV6kKJDMe8Q9FYTyUw0ogx-Oi4pfAn9j4'; //replace your api key
+    const apiKey = String.fromEnvironment('GEMINI_API_KEY');
+    
+    if (apiKey.isEmpty) {
+      final errorMessage = types.TextMessage(
+        author: _user2,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+        id: const Uuid().v4(),
+        text: 'Error: Gemini API key not configured. Please set GEMINI_API_KEY environment variable.',
+      );
+      _addMessage(errorMessage);
+      return;
+    }
+    
     final model =
         GenerativeModel(model: 'gemini-1.5-flash-latest', apiKey: apiKey);
     final content = [Content.text(prompt)];

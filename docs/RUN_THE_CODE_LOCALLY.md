@@ -1,6 +1,38 @@
 # Running the Code Locally 🧑‍💻🚀
 
-Monekin is fully open-source, allowing you to run it locally on your device. Whether you’re curious about how the app works, planning to contribute, or simply exploring, this guide provides all the steps to get started.
+M## Running the App ▶️
+
+With the setup complete, you can run the app on a connected device or an emulator:
+
+```bash
+flutter run
+```
+
+If everything is set up correctly, the app will launch, and you'll be able to test its features locally.
+
+## AI Features Configuration 🤖
+
+The app includes AI-powered features that require additional setup:
+
+### Setting up Gemini AI
+
+1. Get a Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Copy the `.env.example` file to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+3. Open the `.env` file and replace `your_gemini_api_key_here` with your actual API key:
+   ```
+   GEMINI_API_KEY=your_actual_api_key_here
+   ```
+4. Run the app with the environment variable:
+   ```bash
+   flutter run --dart-define=GEMINI_API_KEY=$GEMINI_API_KEY
+   ```
+
+**Note**: Never commit your `.env` file or expose your API keys in the code. The `.env` file is already added to `.gitignore` for your security.
+
+## Building Your Custom App 🏗️ully open-source, allowing you to run it locally on your device. Whether you’re curious about how the app works, planning to contribute, or simply exploring, this guide provides all the steps to get started.
 
 
 ## Prerequisites 🛠️
