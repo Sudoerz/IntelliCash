@@ -579,7 +579,7 @@ class _ImportCSVPageState extends State<ImportCSVPage> {
       scrollDirection: Axis.horizontal,
       child: DataTable(
         headingRowColor: WidgetStateProperty.resolveWith<Color?>(
-          (states) => Theme.of(context).colorScheme.primary.withOpacity(0.18),
+          (states) => Theme.of(context).colorScheme.primary.withAlpha((0.18 * 255).toInt()),
         ),
         clipBehavior: Clip.hardEdge,
         headingTextStyle: Theme.of(context).textTheme.labelLarge,
@@ -606,7 +606,7 @@ class _ImportCSVPageState extends State<ImportCSVPage> {
     return InkWell(
       onTap: () => readFile(),
       child: DottedBorder(
-        color: Colors.grey.withOpacity(0.5),
+        color: Colors.grey.withAlpha((0.5 * 255).toInt()),
         strokeWidth: 3,
         strokeCap: StrokeCap.round,
         borderType: BorderType.RRect,
@@ -621,7 +621,7 @@ class _ImportCSVPageState extends State<ImportCSVPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.add,
-                    size: 48, weight: 10, color: Colors.grey.withOpacity(0.95)),
+                    size: 48, weight: 10, color: Colors.grey.withAlpha((0.95 * 255).toInt())),
                 const SizedBox(height: 4),
                 Text(
                   t.backup.import.tap_to_select_file,

@@ -53,8 +53,8 @@ class NoResults extends StatelessWidget {
                             ? Theme.of(context)
                                 .colorScheme
                                 .primary
-                                .withOpacity(0.7)
-                            : tintColor!.withOpacity(0.7),
+                                .withAlpha((0.7 * 255).toInt())
+                            : tintColor!.withAlpha((0.7 * 255).toInt()),
                         BlendMode.srcIn,
                       ),
                     ),

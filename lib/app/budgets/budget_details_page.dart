@@ -122,12 +122,14 @@ class _BudgetDetailsPageState extends State<BudgetDetailsPage> {
                           BudgetServive.instance
                               .deleteBudget(budget.id)
                               .then((value) {
+                            if (!context.mounted) return;
                             Navigator.pop(context);
 
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content: Text(t.budgets.delete),
                             ));
                           }).catchError((err) {
+                            if (!context.mounted) return;
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(SnackBar(content: Text('$err')));
                           });

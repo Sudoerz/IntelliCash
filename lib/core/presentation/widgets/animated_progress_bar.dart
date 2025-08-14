@@ -60,7 +60,7 @@ class _AnimatedProgressBarState extends State<AnimatedProgressBar> {
             width: isHorizontal ? double.infinity : widget.width,
             clipBehavior: Clip.hardEdge,
             decoration: BoxDecoration(
-                borderRadius: barRadius, color: barColor.withOpacity(0.12)),
+                borderRadius: barRadius, color: barColor.withAlpha((0.12 * 255).toInt())),
             child: FractionallySizedBox(
               widthFactor: isHorizontal ? value : 1,
               heightFactor: isHorizontal ? 1 : value,

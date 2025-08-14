@@ -46,3 +46,8 @@ app.*.map.json
 # Project specific
 **/generated/
 android/app/.cxx/
+
+# Environment variables
+.env
+.env.local
+.env.*.local

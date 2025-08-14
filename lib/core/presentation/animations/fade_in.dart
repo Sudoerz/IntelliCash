@@ -12,17 +12,20 @@ class FadeIn extends StatefulWidget {
   final Duration duration;
 
   @override
-  _FadeInState createState() => _FadeInState(duration);
+  FadeInState createState() => FadeInState();
 }
 
-class _FadeInState extends AnimationControllerState<FadeIn> {
-  _FadeInState(super.duration);
+class FadeInState extends AnimationControllerState<FadeIn> {
+  FadeInState() : super(const Duration(milliseconds: 200));
 
   late Animation<double> _opacityAnimation;
 
   @override
   void initState() {
     super.initState();
+
+    // Override the animation controller with the widget's duration
+    animationController.duration = widget.duration;
 
     // TO DISABLE THE ANIMATION:
     // if (!saveBattery) {

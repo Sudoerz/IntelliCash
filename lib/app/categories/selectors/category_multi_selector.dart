@@ -7,7 +7,7 @@ import 'package:intellicash/core/extensions/string.extension.dart';
 import 'package:intellicash/core/models/category/category.dart';
 import 'package:intellicash/core/models/supported-icon/icon_displayer.dart';
 import 'package:intellicash/core/presentation/app_colors.dart';
-import 'package:intellicash/core/presentation/widgets/bottomSheetFooter.dart';
+import 'package:intellicash/core/presentation/widgets/bottom_sheet_footer.dart';
 import 'package:intellicash/core/presentation/widgets/count_indicator.dart';
 import 'package:intellicash/core/presentation/widgets/modal_container.dart';
 import 'package:intellicash/core/presentation/widgets/scrollable_with_bottom_gradient.dart';

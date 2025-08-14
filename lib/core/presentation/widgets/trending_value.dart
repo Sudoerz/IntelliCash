@@ -88,7 +88,7 @@ class TrendingValue extends StatelessWidget {
     final textColor = _getColorBasedOnPercentage(context)
         .lighten(filled && !outlined ? 0.85 : 0);
     final backgroundColor = filled && outlined
-        ? trendColor.lighten(0.85).withOpacity(0.95)
+        ? trendColor.lighten(0.85).withAlpha((0.95 * 255).toInt())
         : filled
             ? trendColor
             : null;

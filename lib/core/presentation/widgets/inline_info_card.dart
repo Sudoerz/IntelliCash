@@ -63,7 +63,7 @@ class InlineInfoCard extends StatelessWidget {
               textAlign: direction == Axis.vertical
                   ? TextAlign.center
                   : TextAlign.left,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12.25,
                 fontWeight: FontWeight.w400,
               ),

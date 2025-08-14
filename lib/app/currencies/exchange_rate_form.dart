@@ -6,7 +6,7 @@ import 'package:intellicash/core/database/services/exchange-rate/exchange_rate_s
 import 'package:intellicash/core/extensions/color.extensions.dart';
 import 'package:intellicash/core/models/currency/currency.dart';
 import 'package:intellicash/core/models/exchange-rate/exchange_rate.dart';
-import 'package:intellicash/core/presentation/widgets/bottomSheetFooter.dart';
+import 'package:intellicash/core/presentation/widgets/bottom_sheet_footer.dart';
 import 'package:intellicash/core/presentation/widgets/currency_selector_modal.dart';
 import 'package:intellicash/core/presentation/widgets/form_fields/date_field.dart';
 import 'package:intellicash/core/presentation/widgets/form_fields/date_form_field.dart';
@@ -94,13 +94,18 @@ class _ExchangeRateFormDialogState extends State<ExchangeRateFormDialog> {
             date: date,
             exchangeRate: double.parse(rateController.text)))
         .then((value) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(isEditMode
               ? t.currencies.form.edit_success
               : t.currencies.form.add_success)));
     }).catchError((err) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
-    }).whenComplete(() => Navigator.pop(context));
+    }).whenComplete(() {
+      if (!mounted) return;
+      Navigator.pop(context);
+    });
   }
 
   @override

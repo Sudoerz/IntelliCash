@@ -334,6 +334,7 @@ class _TransactionFormPageState extends State<TransactionFormPage>
 
         onSuccess();
       } catch (error) {
+        if (!mounted) return;
         Navigator.pop(context);
         scMessenger.showSnackBar(SnackBar(content: Text(error.toString())));
       }
@@ -442,7 +443,7 @@ class _TransactionFormPageState extends State<TransactionFormPage>
           selectedStatus.icon,
           color:
               (selectedStatus?.color ?? Theme.of(context).colorScheme.primary)
-                  .withOpacity(isSelectorDisabled ? 0.3 : 1),
+                  .withAlpha(((isSelectorDisabled ? 0.3 : 1) * 255).toInt()),
         ),
       ),
       minTileHeight: 64,
@@ -482,6 +483,7 @@ class _TransactionFormPageState extends State<TransactionFormPage>
               recurrentRule = res.result!;
             });
           } else {
+            if (!mounted) return;
             RouteUtils.pushRoute(
               context,
               IntervalSelectorPage(preselectedRecurrentRule: recurrentRule),
@@ -568,7 +570,8 @@ class _TransactionFormPageState extends State<TransactionFormPage>
                       ? t.transaction.new_expense
                       : t.transaction.new_income,
         ),
-        backgroundColor: transactionType.color(context).withOpacity(0.85),
+        backgroundColor:
+            transactionType.color(context).withAlpha((0.85 * 255).round()),
         foregroundColor: Colors.white,
         elevation: 0,
         bottom: TabBar(
@@ -576,7 +579,7 @@ class _TransactionFormPageState extends State<TransactionFormPage>
           labelColor: Colors.white,
           labelStyle: const TextStyle(fontWeight: FontWeight.w700),
           unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
-          unselectedLabelColor: Colors.white.withOpacity(0.8),
+          unselectedLabelColor: Colors.white.withAlpha((0.8 * 255).round()),
           tabAlignment: TabAlignment.fill,
           dividerColor: transactionType.color(context).darken(0.3),
           controller: _tabController,
@@ -684,7 +687,7 @@ class _TransactionFormPageState extends State<TransactionFormPage>
 
   Widget buildAmountContainer(BuildContext context) {
     return Tappable(
-      bgColor: transactionType.color(context).withOpacity(0.85),
+      bgColor: transactionType.color(context).withAlpha((0.85 * 255).round()),
       onTap: () => displayAmountModal(context),
       borderRadius: BreakPoint.of(context).isLargerThan(BreakpointID.md)
           ? BorderRadius.only(
@@ -895,7 +898,7 @@ class _TransactionFormPageState extends State<TransactionFormPage>
 
     return DecoratedBox(
         decoration: BoxDecoration(
-          color: transactionType.color(context).withOpacity(0.35),
+          color: transactionType.color(context).withAlpha((0.35 * 255).round()),
           borderRadius: BorderRadius.only(
             bottomLeft: borderRadius,
             bottomRight: borderRadius,
@@ -930,7 +933,9 @@ class _TransactionFormPageState extends State<TransactionFormPage>
                       }),
                 ),
                 VerticalDivider(
-                  color: transactionType.color(context).withOpacity(0.85),
+                  color: transactionType
+                      .color(context)
+                      .withAlpha((0.85 * 255).round()),
                   thickness: 2,
                 )
               ],

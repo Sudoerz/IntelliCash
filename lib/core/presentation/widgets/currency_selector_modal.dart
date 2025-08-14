@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intellicash/core/database/services/currency/currency_service.dart';
 import 'package:intellicash/core/models/currency/currency.dart';
 import 'package:intellicash/core/presentation/app_colors.dart';
-import 'package:intellicash/core/presentation/widgets/bottomSheetFooter.dart';
+import 'package:intellicash/core/presentation/widgets/bottom_sheet_footer.dart';
 import 'package:intellicash/core/presentation/widgets/modal_container.dart';
 import 'package:intellicash/core/presentation/widgets/scrollable_with_bottom_gradient.dart';
 import 'package:intellicash/core/presentation/widgets/skeleton.dart';

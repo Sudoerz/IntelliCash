@@ -86,6 +86,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
       BudgetServive.instance.updateBudget(toPush).then((value) {
         onSuccess();
       }).catchError((error) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(error.toString())));
       });
@@ -93,6 +94,7 @@ class _BudgetFormPageState extends State<BudgetFormPage> {
       BudgetServive.instance.insertBudget(toPush).then((value) {
         onSuccess();
       }).catchError((error) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(error.toString())));
       });

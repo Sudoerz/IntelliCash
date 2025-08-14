@@ -122,7 +122,7 @@ ThemeData getThemeData(
       isDense: true,
       hintStyle: TextStyle(color: customAppColors.textHint),
       floatingLabelStyle: TextStyle(
-        backgroundColor: theme.colorScheme.surface.withOpacity(0.5),
+        backgroundColor: theme.colorScheme.surface.withAlpha((0.5 * 255).toInt()),
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10.0),

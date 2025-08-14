@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intellicash/core/presentation/widgets/bottomSheetFooter.dart';
+import 'package:intellicash/core/presentation/widgets/bottom_sheet_footer.dart';
 import 'package:intellicash/core/presentation/widgets/color_picker/custom_color_picker.dart';
 import 'package:intellicash/core/presentation/widgets/modal_container.dart';
 import 'package:intellicash/i18n/generated/translations.g.dart';

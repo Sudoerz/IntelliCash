@@ -59,7 +59,7 @@ class _PieChartByCategoriesState extends State<PieChartByCategories> {
   }
 
   Future<List<TrDistributionChartItem<Category>>> getEvolutionData(
-      BuildContext context, List<MoneyTransaction> transactions) async {
+      List<MoneyTransaction> transactions) async {
     final data = <TrDistributionChartItem<Category>>[];
 
     for (final transaction in transactions) {
@@ -104,7 +104,7 @@ class _PieChartByCategoriesState extends State<PieChartByCategories> {
     if (data.isEmpty) {
       return [
         PieChartSectionData(
-          color: Colors.grey.withOpacity(0.175),
+          color: Colors.grey.withAlpha((0.175 * 255).toInt()),
           value: 100,
           radius: 50,
           showTitle: false,
@@ -208,7 +208,10 @@ class _PieChartByCategoriesState extends State<PieChartByCategories> {
     return StreamBuilder(
       stream: TransactionService.instance
           .getTransactions(filters: _getTransactionFilters())
-          .asyncMap((data) => getEvolutionData(context, data)),
+          .asyncMap((data) async {
+        if (!mounted) return <TrDistributionChartItem<Category>>[];
+        return getEvolutionData(data);
+      }),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const LinearProgressIndicator();
@@ -280,7 +283,7 @@ class _PieChartByCategoriesState extends State<PieChartByCategories> {
                             color: Theme.of(context)
                                 .colorScheme
                                 .surface
-                                .withOpacity(0.1),
+                                .withAlpha((0.1 * 255).round()),
                           ),
                         )),
                   ),
@@ -336,6 +339,7 @@ class _PieChartByCategoriesState extends State<PieChartByCategories> {
                       size: 25,
                     ),
                     onTap: () {
+                      if (!mounted) return;
                       showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,

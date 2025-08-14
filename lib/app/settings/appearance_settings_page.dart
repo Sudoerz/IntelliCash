@@ -37,7 +37,8 @@ class SelectItem<T> {
 }
 
 class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
-  late GlobalKey<MonekinDropdownSelectState>? _themeDropdownKey = GlobalKey();
+  late final GlobalKey<MonekinDropdownSelectState> _themeDropdownKey =
+      GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +79,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                   return;
                 }
 
-                LocaleSettings.setLocaleRaw(newLang!.result!,
+                await LocaleSettings.setLocaleRaw(newLang!.result!,
                     listenToDeviceLocale: true);
 
                 try {
@@ -111,7 +112,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                     ],
                   ),
                   onTap: () {
-                    _themeDropdownKey!.currentState!.openDropdown();
+                    _themeDropdownKey.currentState!.openDropdown();
                   },
                   leading: ScaledAnimatedSwitcher(
                     keyToWatch: theme.icon(context).toString(),
@@ -195,8 +196,9 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                         width: 46,
                         height: 46,
                         decoration: BoxDecoration(
-                          color: color.withOpacity(
-                            snapshot.data! != 'auto' ? 1 : 0.4,
+                          color: color.withAlpha(
+                            ((snapshot.data! != 'auto' ? 1 : 0.4) * 255)
+                                .toInt(),
                           ),
                           borderRadius: BorderRadius.circular(100),
                         ),

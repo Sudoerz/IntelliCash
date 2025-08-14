@@ -115,6 +115,8 @@ class _CategoryFormPageState extends State<CategoryFormPage> {
               type: _type,
               color: _color))
           .then((value) {
+        if (!mounted) return;
+
         Navigator.pop(context);
 
         messager

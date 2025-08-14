@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intellicash/core/extensions/color.extensions.dart';
 
 class DisplayAppIcon extends StatelessWidget {
   const DisplayAppIcon({

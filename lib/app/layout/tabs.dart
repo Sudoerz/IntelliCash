@@ -45,7 +45,7 @@ class TabsPageState extends State<TabsPage> {
               backgroundColor:
                   Theme.of(context).colorScheme.surfaceContainerHigh,
               indicatorColor:
-                  Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                  Theme.of(context).colorScheme.primary.withAlpha((0.2 * 255).toInt()),
               destinations: menuItems
                   .map((e) => e.toNavigationDestinationWidget(context))
                   .toList(),

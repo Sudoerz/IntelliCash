@@ -1205,6 +1205,7 @@ class _TranslationsGeneralTimeCurrentEs implements TranslationsGeneralTimeCurren
 	@override String get weekly => 'Esta semana';
 	@override String get infinite => 'Desde siempre';
 	@override String get custom => 'Rango personalizado';
+	// ignore: override_on_non_overriding_member
 	@override String get diary => 'Este día';
 }
 

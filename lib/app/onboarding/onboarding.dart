@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intellicash/app/layout/tabs.dart';
-import 'package:intellicash/app/onboarding/classes/OnboardingItem.dart';
+import 'package:intellicash/app/onboarding/classes/onboarding_item.dart';
 import 'package:intellicash/core/database/services/app-data/app_data_service.dart';
 import 'package:intellicash/core/database/services/currency/currency_service.dart';
 import 'package:intellicash/core/database/services/user-setting/user_setting_service.dart';
@@ -35,6 +35,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         .setItem(AppDataKey.introSeen, '1', updateGlobalState: true)
         .then(
       (value) {
+        if (!mounted) return;
         RouteUtils.pushRoute(
           context,
           TabsPage(key: tabsPageKey),
@@ -282,13 +283,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
         final userCurrency = snapshot.data;
 
         return ListTile(
-          tileColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.04),
+          tileColor: Theme.of(context).colorScheme.onSurface.withAlpha((0.04 * 255).toInt()),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           trailing: Icon(
             Icons.arrow_forward_ios_rounded,
             size: 14,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
+            color: Theme.of(context).colorScheme.onSurface.withAlpha((0.45 * 255).toInt()),
           ),
           leading: Container(
             clipBehavior: Clip.hardEdge,

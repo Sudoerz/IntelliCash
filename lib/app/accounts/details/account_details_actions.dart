@@ -79,7 +79,7 @@ abstract class AccountDetailsActions {
             final currentBalance = await AccountService.instance
                 .getAccountMoney(account: account)
                 .first;
-
+            if (!context.mounted) return;
             await showCloseAccountDialog(context,
                 account: account, currentBalance: currentBalance);
           }),
@@ -115,11 +115,13 @@ abstract class AccountDetailsActions {
       )
           .then((value) {
         if (value) {
+          if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(t.account.close.unarchive_succes)),
           );
         }
       }).catchError((err) {
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('$err')));
       });
@@ -156,6 +158,7 @@ abstract class AccountDetailsActions {
 
       AccountService.instance.deleteAccount(accountId).then((value) {
         if (navigateBack) {
+          if (!context.mounted) return;
           Navigator.pop(context);
         }
 

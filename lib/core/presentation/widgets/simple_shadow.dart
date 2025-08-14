@@ -24,7 +24,7 @@ class SimpleShadow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-        if (color.alpha != 0)
+        if (((color.a * 255.0).round() & 0xff) != 0)
           Transform.translate(
             offset: offset,
             child: ImageFiltered(
@@ -39,7 +39,7 @@ class SimpleShadow extends StatelessWidget {
                 ),
                 child: ColorFiltered(
                   colorFilter: ColorFilter.mode(
-                    color.withOpacity(opacity),
+                    color.withAlpha((opacity * 255).toInt()),
                     BlendMode.srcATop,
                   ),
                   child: child,

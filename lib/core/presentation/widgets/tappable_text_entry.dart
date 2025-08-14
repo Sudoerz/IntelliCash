@@ -81,7 +81,7 @@ class TappableTextEntry extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadiusDirectional.circular(5),
-                color: Theme.of(context).colorScheme.surface.withOpacity(0.2),
+                color: Theme.of(context).colorScheme.surface.withAlpha((0.2 * 255).toInt()),
               ),
             ),
           ),

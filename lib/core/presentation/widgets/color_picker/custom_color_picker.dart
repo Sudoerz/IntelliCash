@@ -28,7 +28,7 @@ class _CustomColorPickerState extends State<CustomColorPicker> {
   HSVColor currentHsvColor = const HSVColor.fromAHSV(0.0, 0.0, 0.0, 0.0);
   Widget? previewWidget;
 
-  Color get currentColor => currentHsvColor.toColor().withOpacity(1);
+  Color get currentColor => currentHsvColor.toColor().withAlpha(255);
 
   final TextEditingController hexColorText = TextEditingController(text: '');
 

@@ -48,7 +48,7 @@ class IncomeOrExpenseCard extends StatelessWidget {
                 style: Theme.of(context).textTheme.labelMedium!.copyWith(
                     color: AppColors.of(context)
                         .onConsistentPrimary
-                        .withOpacity(0.85)),
+                        .withAlpha((0.85 * 255).toInt())),
               ),
               StreamBuilder(
                   stream: AccountService.instance.getAccountsBalance(

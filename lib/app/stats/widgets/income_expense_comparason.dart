@@ -127,7 +127,7 @@ class IncomeExpenseTile extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: type.color(context).withOpacity(0.1),
+          color: type.color(context).withAlpha((0.1 * 255).toInt()),
           borderRadius: BorderRadius.circular(4),
         ),
         child: Icon(

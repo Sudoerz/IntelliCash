@@ -349,6 +349,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     (e) => TransactionService.instance.deleteTransaction(e.id));
 
                 Future.wait(futures).then((value) {
+                  if(!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text(selectedTransactions.length <= 1
                         ? t.transaction.delete_success
@@ -360,6 +361,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     selectedTransactions = [];
                   });
                 }).catchError((err) {
+                  if(!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text(err.toString()),
                   ));

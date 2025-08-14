@@ -6,7 +6,7 @@ import 'package:intellicash/core/database/app_db.dart';
 import 'package:intellicash/core/database/services/account/account_service.dart';
 import 'package:intellicash/core/models/account/account.dart';
 import 'package:intellicash/core/presentation/app_colors.dart';
-import 'package:intellicash/core/presentation/widgets/bottomSheetFooter.dart';
+import 'package:intellicash/core/presentation/widgets/bottom_sheet_footer.dart';
 import 'package:intellicash/core/presentation/widgets/count_indicator.dart';
 import 'package:intellicash/core/presentation/widgets/modal_container.dart';
 import 'package:intellicash/core/presentation/widgets/scrollable_with_bottom_gradient.dart';

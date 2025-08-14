@@ -128,9 +128,7 @@ class MonekinDropdownSelectState<T> extends State<MonekinDropdownSelect<T>> {
                       color: Theme.of(context)
                           .colorScheme
                           .onSurface
-                          .withOpacity(_isItemDisabled(value) || !widget.enabled
-                              ? 0.3
-                              : 1),
+                          .withAlpha(((_isItemDisabled(value) || !widget.enabled ? 0.3 : 1) * 255).toInt()),
                     ),
                   ),
                 );
@@ -156,10 +154,7 @@ class MonekinDropdownSelectState<T> extends State<MonekinDropdownSelect<T>> {
                             : value.toString(),
                         style: TextStyle(
                           color: (Theme.of(context).colorScheme.onSurface)
-                              .withOpacity(
-                                  _isItemDisabled(value) || !widget.enabled
-                                      ? 0.3
-                                      : 1),
+                              .withAlpha(((_isItemDisabled(value) || !widget.enabled ? 0.3 : 1) * 255).toInt()),
                         ),
                       ),
                       if (isSelected)
@@ -204,7 +199,7 @@ class SelectorContainer extends StatelessWidget {
             Theme.of(context)
                 .colorScheme
                 .surfaceContainerHigh
-                .withOpacity(enabled ? 1 : 0.75),
+                .withAlpha((enabled ? 1 : 0.75 * 255).toInt()),
         borderRadius: BorderRadiusDirectional.circular(10),
       ),
       child: child,

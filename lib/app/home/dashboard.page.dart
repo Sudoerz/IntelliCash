@@ -169,7 +169,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             Divider(
               height: 16,
-              color: AppColors.of(context).onConsistentPrimary.withOpacity(0.5),
+              color: AppColors.of(context).onConsistentPrimary.withAlpha((0.5 * 255).toInt()),
             ),
             const SizedBox(height: 8),
             StreamBuilder(
@@ -304,7 +304,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "Welcome again!",
+                    'Welcome again!',
                     softWrap: false,
                     style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                           fontWeight: FontWeight.w300,

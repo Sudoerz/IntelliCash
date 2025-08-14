@@ -29,7 +29,7 @@ class MonekinQuickActionsButton extends StatelessWidget {
                           CircleAvatar(
                             backgroundColor: item
                                 .getColorBasedOnRole(context)
-                                .withOpacity(0.15),
+                                .withAlpha((0.15 * 255).toInt()),
                             radius: 24,
                             child: IconButton(
                                 onPressed: item.onClick,

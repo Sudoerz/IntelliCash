@@ -28,7 +28,7 @@ class ScrollableWithBottomGradient extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [color.withOpacity(0), color],
+            colors: [color.withAlpha(0), color],
           ),
         ),
       ),

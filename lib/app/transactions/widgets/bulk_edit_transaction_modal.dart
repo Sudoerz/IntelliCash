@@ -43,6 +43,7 @@ class BulkEditTransactionModal extends StatelessWidget {
                     return;
                   }
 
+                  if(!context.mounted) return;
                   performUpdates(
                     context,
                     futures: transactionsToEdit.map(
@@ -68,6 +69,7 @@ class BulkEditTransactionModal extends StatelessWidget {
                       return;
                     }
 
+                    if(!context.mounted) return;
                     performUpdates(
                       context,
                       futures: transactionsToEdit.map(
@@ -90,6 +92,7 @@ class BulkEditTransactionModal extends StatelessWidget {
                       return;
                     }
 
+                    if(!context.mounted) return;
                     performUpdates(
                       context,
                       futures: transactionsToEdit.map(
@@ -133,6 +136,7 @@ class BulkEditTransactionModal extends StatelessWidget {
     Navigator.pop(context);
 
     Future.wait(futures).then((value) {
+      if(!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(transactionsToEdit.length <= 1
             ? t.transaction.edit_success
@@ -142,6 +146,7 @@ class BulkEditTransactionModal extends StatelessWidget {
 
       onSuccess();
     }).catchError((err) {
+      if(!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(err.toString()),
       ));

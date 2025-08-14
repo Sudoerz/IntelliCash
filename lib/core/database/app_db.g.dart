@@ -5231,7 +5231,7 @@ final class $AccountsReferences
 
   $CurrenciesProcessedTableManager get currencyId {
     final manager = $CurrenciesTableManager($_db, $_db.currencies)
-        .filter((f) => f.code($_item.currencyId!));
+        .filter((f) => f.code($_item.currencyId));
     final item = $_typedResult.readTableOrNull(_currencyIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -6058,7 +6058,7 @@ final class $TransactionsReferences
 
   $AccountsProcessedTableManager get accountID {
     final manager = $AccountsTableManager($_db, $_db.accounts)
-        .filter((f) => f.id($_item.accountID!));
+        .filter((f) => f.id($_item.accountID));
     final item = $_typedResult.readTableOrNull(_accountIDTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -6751,7 +6751,7 @@ final class $ExchangeRatesReferences
 
   $CurrenciesProcessedTableManager get currencyCode {
     final manager = $CurrenciesTableManager($_db, $_db.currencies)
-        .filter((f) => f.code($_item.currencyCode!));
+        .filter((f) => f.code($_item.currencyCode));
     final item = $_typedResult.readTableOrNull(_currencyCodeTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -7250,7 +7250,7 @@ final class $TransactionTagsReferences
 
   $TransactionsProcessedTableManager get transactionID {
     final manager = $TransactionsTableManager($_db, $_db.transactions)
-        .filter((f) => f.id($_item.transactionID!));
+        .filter((f) => f.id($_item.transactionID));
     final item = $_typedResult.readTableOrNull(_transactionIDTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -7262,7 +7262,7 @@ final class $TransactionTagsReferences
 
   $TagsProcessedTableManager get tagID {
     final manager =
-        $TagsTableManager($_db, $_db.tags).filter((f) => f.id($_item.tagID!));
+        $TagsTableManager($_db, $_db.tags).filter((f) => f.id($_item.tagID));
     final item = $_typedResult.readTableOrNull(_tagIDTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -7887,7 +7887,7 @@ final class $BudgetCategoryReferences
 
   $BudgetsProcessedTableManager get budgetID {
     final manager = $BudgetsTableManager($_db, $_db.budgets)
-        .filter((f) => f.id($_item.budgetID!));
+        .filter((f) => f.id($_item.budgetID));
     final item = $_typedResult.readTableOrNull(_budgetIDTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -7899,7 +7899,7 @@ final class $BudgetCategoryReferences
 
   $CategoriesProcessedTableManager get categoryID {
     final manager = $CategoriesTableManager($_db, $_db.categories)
-        .filter((f) => f.id($_item.categoryID!));
+        .filter((f) => f.id($_item.categoryID));
     final item = $_typedResult.readTableOrNull(_categoryIDTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -8182,7 +8182,7 @@ final class $BudgetAccountReferences
 
   $BudgetsProcessedTableManager get budgetID {
     final manager = $BudgetsTableManager($_db, $_db.budgets)
-        .filter((f) => f.id($_item.budgetID!));
+        .filter((f) => f.id($_item.budgetID));
     final item = $_typedResult.readTableOrNull(_budgetIDTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -8194,7 +8194,7 @@ final class $BudgetAccountReferences
 
   $AccountsProcessedTableManager get accountID {
     final manager = $AccountsTableManager($_db, $_db.accounts)
-        .filter((f) => f.id($_item.accountID!));
+        .filter((f) => f.id($_item.accountID));
     final item = $_typedResult.readTableOrNull(_accountIDTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(

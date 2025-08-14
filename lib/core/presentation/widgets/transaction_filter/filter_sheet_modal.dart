@@ -13,7 +13,7 @@ import 'package:intellicash/core/models/category/category.dart';
 import 'package:intellicash/core/models/tags/tag.dart';
 import 'package:intellicash/core/models/transaction/transaction_status.enum.dart';
 import 'package:intellicash/core/presentation/app_colors.dart';
-import 'package:intellicash/core/presentation/widgets/bottomSheetFooter.dart';
+import 'package:intellicash/core/presentation/widgets/bottom_sheet_footer.dart';
 import 'package:intellicash/core/presentation/widgets/form_fields/date_field.dart';
 import 'package:intellicash/core/presentation/widgets/form_fields/date_form_field.dart';
 import 'package:intellicash/core/presentation/widgets/modal_container.dart';

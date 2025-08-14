@@ -22,7 +22,7 @@ class TranslucentTransactionStatusCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: color.withOpacity(0.125),
+        color: color.withAlpha((0.125 * 255).round()),
         border: Border.all(
           width: 1,
           color: color,

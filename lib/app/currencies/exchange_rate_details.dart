@@ -44,8 +44,8 @@ class _ExchangeRateDetailsPageState extends State<ExchangeRateDetailsPage> {
     ExchangeRateService.instance
         .deleteExchangeRates(currencyCode: widget.currency.code)
         .then((value) {
+      if (!mounted) return;
       Navigator.pop(context);
-
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(t.currencies.delete_all_success)));
     });

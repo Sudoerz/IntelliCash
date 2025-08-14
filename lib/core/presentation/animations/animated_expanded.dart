@@ -32,10 +32,10 @@ class AnimatedExpanded extends StatefulWidget {
   });
 
   @override
-  _AnimatedExpandedState createState() => _AnimatedExpandedState();
+  AnimatedExpandedState createState() => AnimatedExpandedState();
 }
 
-class _AnimatedExpandedState extends State<AnimatedExpanded>
+class AnimatedExpandedState extends State<AnimatedExpanded>
     with SingleTickerProviderStateMixin {
   late AnimationController expandController;
   late Animation<double> sizeAnimation;

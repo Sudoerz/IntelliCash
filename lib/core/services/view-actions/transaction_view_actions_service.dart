@@ -89,6 +89,7 @@ class TransactionViewActionService {
         }
 
         if (navigateBack) {
+          if(!context.mounted) return;
           Navigator.pop(context);
         }
 

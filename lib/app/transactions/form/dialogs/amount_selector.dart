@@ -349,7 +349,7 @@ class _AmountSelectorState extends State<AmountSelector> {
                                         : Theme.of(context)
                                             .colorScheme
                                             .onSurface
-                                            .withOpacity(0.3)),
+                                            .withAlpha((0.3 * 255).round())),
                                 integerStyle: bigSizeStyle,
                                 currencyStyle: bigSizeStyle,
                               );
@@ -570,7 +570,7 @@ class CalculatorButton extends StatelessWidget {
       effectiveBgColor = Theme.of(context).colorScheme.primary;
     } else if (style == CalculatorButtonStyle.secondary) {
       effectiveTextColor =
-          Theme.of(context).colorScheme.onSurface.withOpacity(0.9);
+          Theme.of(context).colorScheme.onSurface.withAlpha((0.9 * 255).round());
       effectiveBgColor = Theme.of(context).colorScheme.surfaceContainerHigh;
     }
 
@@ -581,18 +581,18 @@ class CalculatorButton extends StatelessWidget {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: Theme.of(context).brightness == Brightness.light
-            ? effectiveBgColor.withOpacity(0.975)
-            : effectiveBgColor.withOpacity(0.85),
+            ? effectiveBgColor.withAlpha((0.975 * 255).round())
+            : effectiveBgColor.withAlpha((0.85 * 255).round()),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
         iconColor: effectiveTextColor,
-        shadowColor: effectiveBgColor.withOpacity(0.85),
-        surfaceTintColor: effectiveBgColor.withOpacity(0.85),
+        shadowColor: effectiveBgColor.withAlpha((0.85 * 255).round()),
+        surfaceTintColor: effectiveBgColor.withAlpha((0.85 * 255).round()),
         foregroundColor: effectiveTextColor,
-        disabledForegroundColor: effectiveTextColor.withOpacity(0.3),
-        disabledIconColor: effectiveTextColor.withOpacity(0.3),
-        disabledBackgroundColor: effectiveBgColor.withOpacity(0.3),
+        disabledForegroundColor: effectiveTextColor.withAlpha((0.3 * 255).round()),
+        disabledIconColor: effectiveTextColor.withAlpha((0.3 * 255).round()),
+        disabledBackgroundColor: effectiveBgColor.withAlpha((0.3 * 255).round()),
         elevation: 0,
         padding: const EdgeInsets.all(0),
       ),

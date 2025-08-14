@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intellicash/core/database/services/user-setting/user_setting_service.dart';
-import 'package:intellicash/core/presentation/widgets/bottomSheetFooter.dart';
+import 'package:intellicash/core/presentation/widgets/bottom_sheet_footer.dart';
 import 'package:intellicash/core/presentation/widgets/modal_container.dart';
 import 'package:intellicash/core/presentation/widgets/tappable.dart';
 import 'package:intellicash/core/presentation/widgets/user_avatar.dart';
@@ -65,6 +65,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
                         userSettingsService.setItem(
                             SettingKey.avatar, selectedAvatar!)
                       ].map((e) => Future.value(e))).then((value) {
+                        if (!context.mounted) return;
                         Navigator.pop(context);
                       });
                     }

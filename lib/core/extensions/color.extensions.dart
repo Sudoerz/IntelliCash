@@ -19,10 +19,10 @@ extension ColorHex on Color {
     bool toUpperCase = true,
   }) {
     final String hex = (leadingHashSign ? '#' : '') +
-        (enableAlpha ? _padRadix(alpha) : '') +
-        _padRadix(red) +
-        _padRadix(green) +
-        _padRadix(blue);
+        (enableAlpha ? _padRadix((a * 255.0).round() & 0xff) : '') +
+        _padRadix((r * 255.0).round() & 0xff) +
+        _padRadix((g * 255.0).round() & 0xff) +
+        _padRadix((b * 255.0).round() & 0xff);
     return toUpperCase ? hex.toUpperCase() : hex;
   }
 
@@ -41,7 +41,10 @@ extension ColorBrightness on Color {
     var f = 1 - amount;
 
     return Color.fromARGB(
-        alpha, (red * f).round(), (green * f).round(), (blue * f).round());
+        (a * 255.0).round() & 0xff, 
+        (((r * 255.0).round() & 0xff) * f).round(), 
+        (((g * 255.0).round() & 0xff) * f).round(), 
+        (((b * 255.0).round() & 0xff) * f).round());
   }
 
   Color lighten([double amount = .1]) {
@@ -52,9 +55,9 @@ extension ColorBrightness on Color {
     }
 
     return Color.fromARGB(
-        alpha,
-        red + ((255 - red) * amount).round(),
-        green + ((255 - green) * amount).round(),
-        blue + ((255 - blue) * amount).round());
+        (a * 255.0).round() & 0xff,
+        (r * 255.0).round() & 0xff + ((255 - (r * 255.0).round() & 0xff) * amount).round(),
+        (g * 255.0).round() & 0xff + ((255 - (g * 255.0).round() & 0xff) * amount).round(),
+        (b * 255.0).round() & 0xff + ((255 - (b * 255.0).round() & 0xff) * amount).round());
   }
 }
